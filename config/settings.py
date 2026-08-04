@@ -14,6 +14,8 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+AUTH_USER_MODEL = "accounts.User"
+
 ALLOWED_HOSTS = []
 
 
@@ -26,6 +28,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    #my_apps
+    'apps.accounts',
+    'apps.movies',
 ]
 
 MIDDLEWARE = [
