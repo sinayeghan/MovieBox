@@ -4,20 +4,51 @@ from django.db import models
 class Genre(models.Model):
     name = models.CharField(
         max_length=100,
-        unique=True
+        unique=True,
     )
 
     slug = models.SlugField(
         max_length=100,
-        unique=True
+        unique=True,
     )
 
     created_at = models.DateTimeField(
-        auto_now_add=True
+        auto_now_add=True,
     )
 
     updated_at = models.DateTimeField(
-        auto_now=True
+        auto_now=True,
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Person(models.Model):
+    name = models.CharField(
+        max_length=255,
+    )
+
+    slug = models.SlugField(
+        max_length=255,
+        unique=True,
+    )
+
+    biography = models.TextField(
+        blank=True,
+    )
+
+    photo = models.ImageField(
+        upload_to="people/photos/",
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
     )
 
     def __str__(self):
@@ -26,39 +57,92 @@ class Genre(models.Model):
 
 class Movie(models.Model):
     title = models.CharField(
-        max_length=255
+        max_length=255,
     )
 
     slug = models.SlugField(
         max_length=255,
-        unique=True
+        unique=True,
     )
 
-    description = models.TextField(blank=True)
+    description = models.TextField(
+        blank=True,
+    )
 
     poster = models.ImageField(
-    upload_to="movies/posters/",
-    blank=True
-)
+        upload_to="movies/posters/",
+        blank=True,
+    )
 
     release_year = models.PositiveSmallIntegerField()
 
     duration = models.PositiveSmallIntegerField(
-        help_text="Duration in minutes"
+        help_text="Duration in minutes",
+    )
+
+    country = models.CharField(
+        max_length=100,
+        blank=True,
+
+    )
+
+    language = models.CharField(
+        max_length=100,
+        blank=True,
     )
 
     genres = models.ManyToManyField(
         Genre,
-        related_name="movies"
+        related_name="movies",
+    )
+
+    people = models.ManyToManyField(
+        Person,
+        through="MoviePerson",
+        related_name="movies",
     )
 
     created_at = models.DateTimeField(
-        auto_now_add=True
+        auto_now_add=True,
     )
 
     updated_at = models.DateTimeField(
-        auto_now=True
+        auto_now=True,
     )
 
     def __str__(self):
         return self.title
+
+
+class MoviePerson(models.Model):
+    class Role(models.TextChoices):
+        ACTOR = "ACTOR", "Actor"
+        DIRECTOR = "DIRECTOR", "Director"
+
+    movie = models.ForeignKey(
+        Movie,
+        on_delete=models.CASCADE,
+        related_name="movie_people",
+    )
+
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        related_name="movie_people",
+    )
+
+    role = models.CharField(
+        max_length=20,
+        choices=Role,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["movie", "person", "role"],
+                name="unique_movie_person_role",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.person} - {self.role}"
