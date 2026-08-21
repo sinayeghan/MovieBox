@@ -113,6 +113,31 @@ class Movie(models.Model):
     def __str__(self):
         return self.title
 
+class MovieImage(models.Model):
+    movie = models.ForeignKey(
+        Movie,
+        on_delete=models.CASCADE,
+        related_name="images",
+    )
+    image = models.ImageField(
+        upload_to="movies/gallery/",
+    )
+    sort_order = models.PositiveIntegerField()
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        ordering = ["sort_order"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["movie", "sort_order"],
+                name="unique_movie_image_order",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.movie.title} - Image {self.sort_order}"
 
 class MoviePerson(models.Model):
     class Role(models.TextChoices):
